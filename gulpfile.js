@@ -40,9 +40,9 @@ gulp.task('push', function() {
 
     var body = JSON.stringify(payload);
     var req = http.request({
-        // protocol: 'http',
-        host: config.PORTAL_DOMAIN + '.ods.com',
-        port: 8000,
+        protocol: config.ODS_PORTAL_PROTOCOL,
+        host: config.ODS_PORTAL_DOMAIN + config.ODS_PORTAL_SUFFIX,
+        port: config.ODS_PORTAL_PORT,
         method: 'POST',
         path: '/api/management/1.0/domain_theme/',
         headers: {
@@ -54,6 +54,10 @@ gulp.task('push', function() {
     req.write(body);
     req.end();
     console.log('Your changes have been pushed and can be browsed:',
-        'http://'+config.PORTAL_DOMAIN+'.ods.com:8000/explore/?stage_theme=true');
+        config.ODS_PORTAL_PROTOCOL +
+        '//' + config.ODS_PORTAL_DOMAIN +
+        '.ods.com' +
+        (config.ODS_PORTAL_PORT !== 80 ? ':' + config.ODS_PORTAL_PORT:'') +
+        '/explore/?stage_theme=true');
 
 });
