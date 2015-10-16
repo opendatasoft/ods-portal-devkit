@@ -5,6 +5,7 @@
   "dependencies": {
     "gulp": "~3.9.0",
     "gulp-autoprefixer": "~3.0.2",
-    "gulp-less": "~3.0.3"
+    "gulp-less": "~3.0.3",
+    "yargs": "^3.27.0"
   }
 }

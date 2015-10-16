@@ -28,9 +28,9 @@ npm install gulp -g
 Copy `config.example.js` to `config.js` and edit the content.
 
 ### Usage
-Create a `main.less` file in `src/less`. This is the file that will be compiled
+You need to create a main LESS file. This is the file that will be compiled
 and pushed to the platform. If you want to split your style in several files,
-you need to import them in your `main.less` file.
+you need to import them in this file.
 
 Example
 ```less
@@ -41,9 +41,17 @@ body {
 }
 ```
 
+If you want everything to work out of the box, you can create a `main.less` file
+in the `src/less` folder; this is the default place where the development kit
+tries to find the files by default.
+
 If you want to push your style to your portal:
 ```
 gulp push
+```
+Or if your main LESS file is not `src/less/main.less`:
+```
+gulp push --lessfile myproject/myfile.less
 ```
 You can see the result of your work using the "Preview" button of the domain
 theme page of your back-office, or just use the link that the command-line gave you.
@@ -52,4 +60,9 @@ You can also have a task running in the background to automatically push your
 changes when you save a file:
 ```
 gulp watch
+```
+Or if your LESS files are not in `src/less/`, you can configure the path to the
+main LESS file and to the folder that needs to be watched:
+```
+gulp watch --lessfile myproject/myfile.less --lesswatchdir myproject/
 ```
