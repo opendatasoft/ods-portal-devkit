@@ -53,6 +53,7 @@ gulp.task('push', function() {
 
     req.write(body);
     req.end();
-    console.log('sent!');
+    console.log('Your changes have been pushed and can be browsed:',
+        'http://'+config.PORTAL_DOMAIN+'.ods.com:8000/explore/?stage_theme=true');
 
 });
