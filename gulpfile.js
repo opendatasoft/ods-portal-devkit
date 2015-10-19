@@ -1,6 +1,7 @@
 var gulp = require('gulp');
 var http = require('http');
 var fs = require('fs');
+var through2 = require('through2');
 var yargs = require('yargs');
 var argv = yargs.argv;
 
@@ -28,38 +29,35 @@ gulp.task('push', function() {
     gulp.src(argv.lessfile||'src/less/main.less')
         .pipe(less())
         .pipe(autoprefixer())
-        .pipe(gulp.dest('build'));
+        //.pipe(gulp.dest('build'))
+        .pipe(through2.obj(function(file, enc, cb) {
+            // Prepare the payload
+            var css = file.contents.toString();
+            console.log(css);
+            var payload = {
+                'css': css
+            };
 
-    // TODO: Skip the writing-to-file step and see if we can directly pipe into
-    // a variable.
+            var body = JSON.stringify(payload);
+            var req = http.request({
+                protocol: config.ODS_PORTAL_PROTOCOL,
+                host: config.ODS_PORTAL_DOMAIN + config.ODS_PORTAL_SUFFIX,
+                port: config.ODS_PORTAL_PORT,
+                method: 'POST',
+                path: '/api/management/1.0/domain_theme/',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': body.length
+                }
+            });
 
-    // Prepare the payload
-    var css = fs.readFileSync('build/main.css').toString();
-    console.log(css);
-    var payload = {
-        'css': css
-    };
-
-    var body = JSON.stringify(payload);
-    var req = http.request({
-        protocol: config.ODS_PORTAL_PROTOCOL,
-        host: config.ODS_PORTAL_DOMAIN + config.ODS_PORTAL_SUFFIX,
-        port: config.ODS_PORTAL_PORT,
-        method: 'POST',
-        path: '/api/management/1.0/domain_theme/',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': body.length
-        }
-    });
-
-    req.write(body);
-    req.end();
-    console.log('Your changes have been pushed and can be browsed:',
-        config.ODS_PORTAL_PROTOCOL +
-        '//' + config.ODS_PORTAL_DOMAIN +
-        '.ods.com' +
-        (config.ODS_PORTAL_PORT !== 80 ? ':' + config.ODS_PORTAL_PORT:'') +
-        '/explore/?stage_theme=true');
-
+            req.write(body);
+            req.end();
+            console.log('Your changes have been pushed and can be browsed:',
+                config.ODS_PORTAL_PROTOCOL +
+                '//' + config.ODS_PORTAL_DOMAIN +
+                '.ods.com' +
+                (config.ODS_PORTAL_PORT !== 80 ? ':' + config.ODS_PORTAL_PORT:'') +
+                '/explore/?stage_theme=true');
+        }));
 });
