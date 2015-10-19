@@ -20,13 +20,13 @@ gulp.task('help', function() {
 
 gulp.task('watch', function() {
     // TODO: Watch, and if a LESS file changes, push it.
-    gulp.watch(argv.lesswatchdir||'src/less/**', ['push']);
+    gulp.watch(argv.lesswatchdir || config.ODS_DEFAULT_LESS_WATCH_DIR, ['push']);
 });
 
 gulp.task('push', function() {
     // Compile the LESS files into a single CSS file, push it to the remote
     // API.
-    gulp.src(argv.lessfile||'src/less/main.less')
+    gulp.src(argv.lessfile || config.ODS_DEFAULT_LESS_FILE)
         .pipe(less())
         .pipe(autoprefixer())
         //.pipe(gulp.dest('build'))
