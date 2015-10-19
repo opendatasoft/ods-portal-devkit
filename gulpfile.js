@@ -35,7 +35,7 @@ gulp.task('push', function() {
             var css = file.contents.toString();
             console.log(css);
             var payload = {
-                'css': css
+                'stylesheet': css
             };
 
             var body = JSON.stringify(payload);
@@ -44,20 +44,28 @@ gulp.task('push', function() {
                 host: config.ODS_PORTAL_DOMAIN + config.ODS_PORTAL_SUFFIX,
                 port: config.ODS_PORTAL_PORT,
                 method: 'POST',
-                path: '/api/management/1.0/domain_theme/',
+                path: '/api/management/1.0/domain_theme/?themeapikey='+config.ODS_THEME_APIKEY,
                 headers: {
                     'Content-Type': 'application/json',
                     'Content-Length': body.length
+                },
+                auth: config.ODS_USERNAME + ':' + config.ODS_PASSWORD
+            }, function(res) {
+                if (res.statusCode === 401) {
+                    console.log('Authentication failure when pushing your changes. Maybe your API key is not valid?');
+                } else if (res.statusCode !== 200) {
+                    console.log('Error when pushing your changes. Status: '+res.statusCode+', Message: '+statusMessage);
+                } else {
+                    console.log('Your changes have been pushed and can be browsed:',
+                        config.ODS_PORTAL_PROTOCOL +
+                        '//' + config.ODS_PORTAL_DOMAIN +
+                        '.ods.com' +
+                        (config.ODS_PORTAL_PORT !== 80 ? ':' + config.ODS_PORTAL_PORT:'') +
+                        '/explore/?stage_theme=true');
                 }
             });
 
             req.write(body);
             req.end();
-            console.log('Your changes have been pushed and can be browsed:',
-                config.ODS_PORTAL_PROTOCOL +
-                '//' + config.ODS_PORTAL_DOMAIN +
-                '.ods.com' +
-                (config.ODS_PORTAL_PORT !== 80 ? ':' + config.ODS_PORTAL_PORT:'') +
-                '/explore/?stage_theme=true');
         }));
 });

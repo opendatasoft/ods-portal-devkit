@@ -1,7 +1,6 @@
 module.exports = {
     ODS_PORTAL_DOMAIN: 'public',
-    ODS_USERNAME: 'odsadmin',
-    ODS_PASSWORD: 'ods',
+    ODS_THEME_APIKEY: '<THEME API KEY>',
 
     // Command-line defaults
     ODS_DEFAULT_LESS_FILE: 'src/less/main.less',
