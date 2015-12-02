@@ -13,9 +13,9 @@ var config = require('./config');
 gulp.task('default', ['help']);
 
 gulp.task('help', function() {
-    //console.log(config.PORTAL_HOST)
-    // TODO: Document the available tasks
-    console.log('You can do this.. or that...');
+    console.log('Available commands:');
+    console.log('   - push: compile the current stylesheet and pushes it as a staged theme on the portal.');
+    console.log('   - watch: runs a compile and push every time a stylesheet file changes.');
 });
 
 gulp.task('watch', function() {
@@ -33,7 +33,7 @@ gulp.task('push', function() {
         .pipe(through2.obj(function(file, enc, cb) {
             // Prepare the payload
             var css = file.contents.toString();
-            console.log(css);
+
             var payload = {
                 'stylesheet': css
             };
@@ -59,9 +59,9 @@ gulp.task('push', function() {
                     console.log('Your changes have been pushed and can be browsed:',
                         config.ODS_PORTAL_PROTOCOL +
                         '//' + config.ODS_PORTAL_DOMAIN +
-                        '.ods.com' +
+                        config.ODS_PORTAL_SUFFIX +
                         (config.ODS_PORTAL_PORT !== 80 ? ':' + config.ODS_PORTAL_PORT:'') +
-                        '/explore/?stage_theme=true');
+                        '/explore/?stage_theme=true&themeapikey=' + config.ODS_THEME_APIKEY);
                 }
             });
 
