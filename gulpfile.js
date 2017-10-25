@@ -28,7 +28,6 @@ gulp.task('push', function() {
     gulp.src(argv.lessfile || config.ODS_DEFAULT_LESS_FILE)
         .pipe(less())
         .pipe(autoprefixer())
-        //.pipe(gulp.dest('build'))
         .pipe(through2.obj(function(file, enc, cb) {
             // Prepare the payload
             var css = file.contents.toString();
@@ -58,10 +57,7 @@ gulp.task('push', function() {
                     console.log('Error when pushing your changes. Status: '+res.statusCode+', Message: '+statusMessage);
                 } else {
                     console.log('Your changes have been pushed and can be browsed:',
-                        config.ODS_PORTAL_PROTOCOL +
-                        '//' + config.ODS_PORTAL_DOMAIN +
-                        config.ODS_PORTAL_SUFFIX +
-                        (config.ODS_PORTAL_PORT !== 80 ? ':' + config.ODS_PORTAL_PORT:'') +
+                        'https://' + config.ODS_PORTAL_DOMAIN + config.ODS_PORTAL_SUFFIX +
                         '/explore/?stage_theme=true&themeapikey=' + config.ODS_THEME_APIKEY);
                 }
             });
