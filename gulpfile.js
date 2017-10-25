@@ -1,6 +1,6 @@
 var gulp = require('gulp');
 var http = require('http');
-var fs = require('fs');
+var https = require('https');
 var through2 = require('through2');
 var yargs = require('yargs');
 var argv = yargs.argv;
@@ -29,7 +29,6 @@ gulp.task('push', function() {
     gulp.src(argv.lessfile || config.ODS_DEFAULT_LESS_FILE)
         .pipe(less())
         .pipe(autoprefixer())
-        //.pipe(gulp.dest('build'))
         .pipe(through2.obj(function(file, enc, cb) {
             // Prepare the payload
             var css = file.contents.toString();
@@ -39,31 +38,37 @@ gulp.task('push', function() {
             };
 
             var body = JSON.stringify(payload);
-            var req = http.request({
-                protocol: config.ODS_PORTAL_PROTOCOL,
+            var options = {
                 host: config.ODS_PORTAL_DOMAIN + config.ODS_PORTAL_SUFFIX,
                 port: config.ODS_PORTAL_PORT,
                 method: 'POST',
-                path: '/api/management/1.0/domain_theme/?themeapikey='+config.ODS_THEME_APIKEY,
+                path: '/api/management/1.0/domain_theme/?themeapikey=' + config.ODS_THEME_APIKEY,
                 headers: {
                     'Content-Type': 'application/json',
                     'Content-Length': body.length
-                },
-                auth: config.ODS_USERNAME + ':' + config.ODS_PASSWORD
-            }, function(res) {
-                if (res.statusCode === 401) {
+                }
+            };
+            if (config.ODS_USERNAME && config.ODS_PASSWORD) {
+                options['auth'] = config.ODS_USERNAME + ':' + config.ODS_PASSWORD;
+            }
+            var responseHandler = function (response) {
+                if (response.statusCode === 401) {
                     console.log('Authentication failure when pushing your changes. Maybe your API key is not valid?');
-                } else if (res.statusCode !== 200) {
-                    console.log('Error when pushing your changes. Status: '+res.statusCode+', Message: '+statusMessage);
+                } else if (response.statusCode !== 200) {
+                    console.log('Error when pushing your changes. Status: ' + response.statusCode + ', Message: ' + response.statusMessage);
                 } else {
                     console.log('Your changes have been pushed and can be browsed:',
-                        config.ODS_PORTAL_PROTOCOL +
-                        '//' + config.ODS_PORTAL_DOMAIN +
-                        config.ODS_PORTAL_SUFFIX +
-                        (config.ODS_PORTAL_PORT !== 80 ? ':' + config.ODS_PORTAL_PORT:'') +
+                        config.ODS_PORTAL_PROTOCOL + '://' + config.ODS_PORTAL_DOMAIN + config.ODS_PORTAL_SUFFIX +
+                        (config.ODS_PORTAL_PROTOCOL !== 'https' || config.ODS_PORTAL_PORT !== 443 ? ':' + config.ODS_PORTAL_PORT : '') +
                         '/explore/?stage_theme=true&themeapikey=' + config.ODS_THEME_APIKEY);
                 }
-            });
+            };
+            var req;
+            if (config.ODS_PORTAL_PROTOCOL === 'http') {
+                req = http.request(options, responseHandler);
+            } else {
+                req = https.request(options, responseHandler);
+            }
 
             req.write(body);
             req.end();
