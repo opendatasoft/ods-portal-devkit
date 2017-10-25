@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var http = require('http');
 var https = require('https');
 var through2 = require('through2');
 var yargs = require('yargs');
@@ -50,17 +51,24 @@ gulp.task('push', function() {
             if (config.ODS_USERNAME && config.ODS_PASSWORD) {
                 options['auth'] = config.ODS_USERNAME + ':' + config.ODS_PASSWORD;
             }
-            var req = https.request(options, function(res) {
-                if (res.statusCode === 401) {
+            var responseHandler = function (response) {
+                if (response.statusCode === 401) {
                     console.log('Authentication failure when pushing your changes. Maybe your API key is not valid?');
-                } else if (res.statusCode !== 200) {
-                    console.log('Error when pushing your changes. Status: '+res.statusCode+', Message: '+statusMessage);
+                } else if (response.statusCode !== 200) {
+                    console.log('Error when pushing your changes. Status: ' + response.statusCode + ', Message: ' + response.statusMessage);
                 } else {
                     console.log('Your changes have been pushed and can be browsed:',
-                        'https://' + config.ODS_PORTAL_DOMAIN + config.ODS_PORTAL_SUFFIX +
+                        config.ODS_PORTAL_PROTOCOL + '://' + config.ODS_PORTAL_DOMAIN + config.ODS_PORTAL_SUFFIX +
+                        (config.ODS_PORTAL_PROTOCOL !== 'https' || config.ODS_PORTAL_PORT !== 443 ? ':' + config.ODS_PORTAL_PORT : '') +
                         '/explore/?stage_theme=true&themeapikey=' + config.ODS_THEME_APIKEY);
                 }
-            });
+            };
+            var req;
+            if (config.ODS_PORTAL_PROTOCOL === 'http') {
+                req = http.request(options, responseHandler);
+            } else {
+                req = https.request(options, responseHandler);
+            }
 
             req.write(body);
             req.end();
