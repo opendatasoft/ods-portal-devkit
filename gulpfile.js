@@ -1,6 +1,5 @@
 var gulp = require('gulp');
-var http = require('http');
-var fs = require('fs');
+var https = require('https');
 var through2 = require('through2');
 var yargs = require('yargs');
 var argv = yargs.argv;
@@ -39,18 +38,20 @@ gulp.task('push', function() {
             };
 
             var body = JSON.stringify(payload);
-            var req = http.request({
-                protocol: config.ODS_PORTAL_PROTOCOL,
+            var options = {
                 host: config.ODS_PORTAL_DOMAIN + config.ODS_PORTAL_SUFFIX,
                 port: config.ODS_PORTAL_PORT,
                 method: 'POST',
-                path: '/api/management/1.0/domain_theme/?themeapikey='+config.ODS_THEME_APIKEY,
+                path: '/api/management/1.0/domain_theme/?themeapikey=' + config.ODS_THEME_APIKEY,
                 headers: {
                     'Content-Type': 'application/json',
                     'Content-Length': body.length
-                },
-                auth: config.ODS_USERNAME + ':' + config.ODS_PASSWORD
-            }, function(res) {
+                }
+            };
+            if (config.ODS_USERNAME && config.ODS_PASSWORD) {
+                options['auth'] = config.ODS_USERNAME + ':' + config.ODS_PASSWORD;
+            }
+            var req = https.request(options, function(res) {
                 if (res.statusCode === 401) {
                     console.log('Authentication failure when pushing your changes. Maybe your API key is not valid?');
                 } else if (res.statusCode !== 200) {
