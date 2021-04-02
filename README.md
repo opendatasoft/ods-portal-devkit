@@ -1,5 +1,5 @@
 This project is a development kit that can be used as a basis for the
-customization of an OpenDataSoft portal. If you are an OpenDataSoft customer and
+customization of an Opendatasoft portal. If you are an Opendatasoft customer and
 you want to edit your domain's theme (CSS), you can either do it from the
 online editor in your back-office, or use this development kit to do it from
 your computer using your own tools, and push the result.
